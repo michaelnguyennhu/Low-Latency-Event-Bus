@@ -19,5 +19,6 @@ Thumbs.db
 #todo file 
 todo
 
-#.cache for clangd
+#clangd
 /.cache/
+compile_commands.json
