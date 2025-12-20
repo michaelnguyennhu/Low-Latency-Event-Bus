@@ -28,7 +28,7 @@ namespace spsc{
     template <typename T> 
     using Storage = std::aligned_storage_t<sizeof(T), alignof(T)>; 
 
-}
+}//nampspace spsc
 
 
 template <typename T> 

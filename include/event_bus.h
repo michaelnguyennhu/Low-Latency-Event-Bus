@@ -2,13 +2,13 @@
 
 #include "event.h"
 #include "ring_buffer.h"
-#include "latency_tracker.h"
+//#include "latency_tracker.h"
 
 #include <atomic>
 #include <thread>
 #include <cstddef>
 
-
+namespace spsc {
 class EventBus {
 public: 
     explicit EventBus(std::size_t capacity_power_of_two); 
@@ -22,7 +22,7 @@ private:
     void consumer_thread_func(std::size_t num_events); 
 
     SpscRingBuffer<Event> buffer_; 
-    LatencyTracker latency_tracker_; 
+    //LatencyTracker latency_tracker_; 
 
     std::thread producer_thread_; 
     std::thread consumer_thread_; 
@@ -30,3 +30,5 @@ private:
     std::atomic<bool> running_{false}; 
 
 };
+
+}//namespace spsc

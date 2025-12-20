@@ -1,6 +1,6 @@
 #include "event_bus.h"
 
-
+namespace spsc {
 EventBus::EventBus(std::size_t capacity_power_of_two) 
     : buffer_( capacity_power_of_two ) 
 {}
@@ -24,3 +24,5 @@ void EventBus::producer_thread_func(std::size_t /*num_events*/) {
 void EventBus::consumer_thread_func(std::size_t /*num_events*/) {
     //TODO
 }
+
+}//namespace spsc
