@@ -7,15 +7,22 @@
 #include "event_bus.h"
 
 int main() {
+    
     //Tunables (start conservative; bump for real benchmarking) 
     constexpr std::size_t kRingCapacity = 1 << 16;          // 65,536 events
-    constexpr std::size_t kMaxSamples   = 1 << 20;          //1,048,576 latency samples kept
+    constexpr std::size_t kMaxSamples   = 1 << 20;          // 1,048,576 latency samples kept
     constexpr std::uint64_t kNumEvents  = 5'000'000;        // target events to publish 
-
+    constexpr std::uint64_t kWarmupEvents = 300'000;        // warmup (not measured)
 
     spsc::EventBus bus{kRingCapacity, kMaxSamples}; 
 
 
+    // Warmup run (ignore stats)
+    bus.start(kWarmupEvents); 
+    bus.join(); 
+
+
+    // Measured run 
     const auto t0 = std::chrono::steady_clock::now(); 
     bus.start(kNumEvents); 
     bus.join();
@@ -47,12 +54,12 @@ int main() {
     
     std::cout << "Latency samples kept: " << stats.count << "\n"; 
     std::cout << "Latency (us):\n"; 
-    std::cout << "   min   " << std::fixed << std::setprecision(3) << ns_to_us(stats.min_ns) << "\n";
-    std::cout << "   p50   " << std::fixed << std::setprecision(3) << ns_to_us(stats.p50_ns) << "\n";
-    std::cout << "   p90   " << std::fixed << std::setprecision(3) << ns_to_us(stats.p99_ns) << "\n";
-    std::cout << "   p999  " << std::fixed << std::setprecision(3) << ns_to_us(stats.p999_ns) << "\n";
-    std::cout << "   max   " << std::fixed << std::setprecision(3) << ns_to_us(stats.max_ns) << "\n";
-    std::cout << "   mean  " << std::fixed << std::setprecision(3) << ns_to_us(static_cast<std::uint64_t>(stats.mean_ns)) << "\n\n";
+    std::cout << "   min   " << stats.min_ns << "ns (" << std::fixed << std::setprecision(3) << ns_to_us(stats.min_ns) << "us)\n";
+    std::cout << "   p50   " << stats.p50_ns << "ns (" << std::fixed << std::setprecision(3) << ns_to_us(stats.p50_ns) << "us)\n";
+    std::cout << "   p90   " << stats.p99_ns << "ns (" << std::fixed << std::setprecision(3) << ns_to_us(stats.p99_ns) << "us)\n";
+    std::cout << "   p999  " << stats.p999_ns << "ns ("<< std::fixed << std::setprecision(3) << ns_to_us(stats.p999_ns) << "us)\n";
+    std::cout << "   max   " << stats.max_ns << "ns ("<< std::fixed << std::setprecision(3) << ns_to_us(stats.max_ns) << "us)\n";
+    std::cout << "   mean  " << stats.mean_ns << "ns ("<< std::fixed << std::setprecision(3) << ns_to_us(static_cast<std::uint64_t>(stats.mean_ns)) << "us)\n\n";
     
     std::cout << "Counters:\n";
     std::cout << "   produced:          " << ctrs.produced << "\n"; 
