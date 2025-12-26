@@ -1,7 +1,7 @@
 #include "event_bus.h"
 
 
-#include <utility> // for std::move
+#include <utility> 
 
 
 namespace spsc {
@@ -100,7 +100,9 @@ void EventBus::producer_loop_(std::uint64_t target_events) {
         }
         else {
             ++push_fail_spins_; 
-            // In ultra-low-latency code, may add a pause/yield hint here
+            if ((push_fail_spins_ & 0x3FFFu) == 0) {
+                std::this_thread::yield(); 
+            }
         }
     }
 }
@@ -117,7 +119,7 @@ void EventBus::consumer_loop_() {
             latency_.record_ns(lat); 
             ++consumed_; 
 
-            //Optional correctness: check FIFO end-to-end
+            // Check FIFO end-to-end
             if (e.seq != expected_seq_) { 
                 ++seq_mismatch_; 
                 expected_seq_ = e.seq + 1; //resync
@@ -128,7 +130,9 @@ void EventBus::consumer_loop_() {
         }
         else {
             ++pop_fail_spins_; 
-            //in ultra-low-latency code, may add a pause/yield hint here. 
+            if ((pop_fail_spins_ & 0x3FFFu) == 0) {
+                std::this_thread::yield(); 
+            }
         }
     }
 }
